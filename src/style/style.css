@@ -1,0 +1,24 @@
+
+.bg-darker {
+    background-color: #151517;
+}
+
+.point {
+    background-color: #ffffff;
+    border-radius: 16px;
+    width: 8px;
+    height: 8px;
+}
+
+svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+
+path {
+  fill: none;
+  stroke: cornflowerblue;
+  stroke-width: 2;
+}
