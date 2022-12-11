@@ -39,6 +39,27 @@ const drawPath = (points, tension) => {
     return path;
 }
 
+const getPoint = (intersections) => {
+    let points = []
+    for(var i = 0; i <= intersections; i ++){
+        let distance = i * 2;
+        let point = path.getPointAtLength(distance);
+        points.push(point.y)
+    }
+    return points
+}
+
+const playAnimation = () => {
+    let allPoints = getPoint(600)
+    let element = document.querySelector("#element")
+    let i = 0
+
+    setInterval(() => {
+        element.style.left = `${allPoints[i]}px`
+        i += 1
+    }, 50);
+}
+
 poly.setAttribute("points", points);
 path.setAttribute("d", drawPath(points, tension));
 
