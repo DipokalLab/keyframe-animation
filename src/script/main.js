@@ -1,4 +1,6 @@
 let tension = .5;
+let animateInterval;
+
 let poly = document.querySelector("polyline");
 let path = document.querySelector("path");
 let points = [
@@ -50,14 +52,76 @@ const getPoint = (intersections) => {
 }
 
 const playAnimation = () => {
-    let allPoints = getPoint(600)
+    stopAnimation()
+    let loadPointLength = 600
+    let allPoints = getPoint(loadPointLength)
     let element = document.querySelector("#element")
     let i = 0
 
-    setInterval(() => {
+    animateInterval = setInterval(() => {
+        console.log(i, loadPointLength)
+        if(i-1 >= loadPointLength) {
+            clearInterval(animateInterval);
+        }
         element.style.left = `${allPoints[i]}px`
         i += 1
     }, 50);
+}
+
+
+const stopAnimation = () => {
+    clearInterval(animateInterval)
+}
+
+
+const record = () => {
+    let recordedChunks = [];
+    let time = 0;
+    let canvas = document.getElementById("canvas");
+
+    let loadPointLength = 100
+    let allPoints = getPoint(loadPointLength)
+    let i = 0
+    
+    return new Promise(function (res, rej) {
+        let stream = canvas.captureStream(60);
+        mediaRecorder = new MediaRecorder(stream, {
+            mimeType: "video/webm; codecs=vp9"
+        });
+    
+        mediaRecorder.start(time);
+    
+        mediaRecorder.ondataavailable = function (event) {
+            recordedChunks.push(event.data);
+        }
+    
+        mediaRecorder.onstop = function (event) {
+            var blob = new Blob(recordedChunks, {
+                "type": "video/webm"
+            });
+            var url = URL.createObjectURL(blob);
+
+            video.src = url;
+        }
+    
+        let record = setInterval(()=>{
+            if(i++ > loadPointLength) {
+                clearInterval(record);
+                mediaRecorder.stop();
+            }
+            let canvas = document.querySelector("#canvas");
+            let context = canvas.getContext("2d");
+            console.log(allPoints[i])
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.beginPath();
+            context.arc(0 + allPoints[i], 8, 8, 0, 2*Math.PI, false);
+            context.fillStyle = 'white';
+            context.fill();
+            context.stroke();
+        }, 50)
+        
+    });
 }
 
 poly.setAttribute("points", points);
