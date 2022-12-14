@@ -1,4 +1,4 @@
-let tension = .5;
+let tension = 1;
 let animateInterval;
 
 let poly = document.querySelector("polyline");
@@ -9,8 +9,11 @@ let points = [
 
 const addPoint = (e) => {
     console.log("A", e.offsetX, e.offsetY)
-    points.push([e.offsetX, e.offsetY])
-    document.querySelector("#graph").insertAdjacentHTML("beforeend", `<div class="position-absolute point" style="top: ${e.offsetY-4}; left: ${e.offsetX-4};"></div>`)
+    let x = Math.round(e.offsetX)
+    let y = Math.round(e.offsetY)
+
+    points.push([x, y])
+    document.querySelector("#graph").insertAdjacentHTML("beforeend", `<div class="position-absolute point" style="top: ${y-4}; left: ${x-4};"></div>`)
     path.setAttribute("d", drawPath(points, tension));
 }
 
@@ -46,26 +49,64 @@ const getPoint = (intersections) => {
     for(var i = 0; i <= intersections; i ++){
         let distance = i * 2;
         let point = path.getPointAtLength(distance);
-        points.push(point.y)
+        points.push({
+            x: point.x,
+            y: point.y
+        })
     }
+    return points
+}
+
+const getPointAt = (x) => {
+    let from = 0;
+    let to = path.getTotalLength();
+    let current = (from + to) / 2;
+    let point = path.getPointAtLength(current);
+    
+    while (Math.abs(point.x - x) > 0.5) {
+        if (point.x < x)
+            from = current;
+        else
+            to = current;
+        current = (from + to) / 2;
+        point = path.getPointAtLength(current);
+    }
+
+    return {
+        x: point.x,
+        y: point.y
+    };
+}
+
+const getInterpolatedPoints = (loadPointLength) => {
+    let points = []
+
+    for (let index = 0; index < loadPointLength; index++) {
+        points.push(getPointAt(index))
+    }
+
     return points
 }
 
 const playAnimation = () => {
     stopAnimation()
-    let loadPointLength = 600
-    let allPoints = getPoint(loadPointLength)
+    let loadPointLength = 300
+    let allPoints = getInterpolatedPoints(loadPointLength)
     let element = document.querySelector("#element")
     let i = 0
 
     animateInterval = setInterval(() => {
-        console.log(i, loadPointLength)
-        if(i-1 >= loadPointLength) {
-            clearInterval(animateInterval);
+        try {
+            console.log(i, loadPointLength)
+            if(i-1 >= loadPointLength) {
+                clearInterval(animateInterval);
+            }
+            element.style.left = `${allPoints[i].y}px`
+            i += 1
+        } catch (error) {
+            stopAnimation()
         }
-        element.style.left = `${allPoints[i]}px`
-        i += 1
-    }, 50);
+    }, 16);
 }
 
 

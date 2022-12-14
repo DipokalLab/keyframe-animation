@@ -1,3 +1,6 @@
+html, body {
+    overflow: hidden;
+}
 
 .bg-darker {
     background-color: #151517;
